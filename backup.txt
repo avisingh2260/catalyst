@@ -1,0 +1,2 @@
+python logistic_regression.py
+python scrape.py shroff.parimal@gmail.com

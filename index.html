@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Theme Made By www.w3schools.com - No Copyright -->
+ <title>Code Grind - Team Catalyst</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+  <style>
+
+  p {font-size: 16px;}
+  .margin {margin-bottom: 45px;}
+  .bg-1 { 
+      background-color: #1abc9c; /* Green */
+      color: #ffffff;
+  }
+  .bg-2 { 
+      background-color: #474e5d; /* Dark Blue */
+      color: #ffffff;
+  }
+  .bg-3 { 
+      background-color: #ffffff; /* White */
+      color: #555555;
+  }
+  .bg-4 { 
+      background-color: #2f2f2f; /* Black Gray */
+      color: #fff;
+  }
+  .container-fluid {
+      padding-top: 70px;
+      padding-bottom: 70px;
+  }
+  .navbar {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      font-size: 12px;
+      letter-spacing: 5px;
+  }
+  .navbar-nav  li a:hover {
+      color: #1abc9c !important;
+  }
+  </style>
+  <script>
+/*eslint-env jquery */
+$(document).ready(function() {
+	
+$.ajax({
+   url: 'https://serious-azimuth-140706.appspot.com/all',
+   //url: 'https://8080-dot-3268910-dot-devshell.appspot.com/all',
+   
+   data: {
+      format: 'json'
+   },
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+   },
+   dataType: 'json',
+   cors: true ,
+          contentType:'application/json',
+          secure: true,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
+   success: function(result) {
+    var tableStart = "<table id='RMDataTable' class='table table-striped table-bordered' cellspacing='0' width='100%''>";
+    var tableheader = "<thead><tr><th align='center'>Client Id</th><th align='center'>Email</th><th align='center'>Age</th><th align='center'>Relationship Value</th><th>Relationship Sentiment</th></tr></thead>";
+    var tablefooter = "<tfoot><tr><th align='center'>Client Id</th><th align='center'>Email</th><th align='center'>Age</th><th align='center'>Relationship Value</th><th>Relationship Sentiment</th></tr></tfoot>";
+    var tablebody = "<tbody>";
+    const rows = result;
+    for (const row of rows) {
+    	var probabilityTxt="";
+    	var probability = parseFloat(row.data.sentimentData.Probability[0].value)*100;
+    	
+    	if(probability>=60 && probability<=100 ){
+         probabilityTxt = "High Risk of Losing the Client";
+    	}else if(probability<60 && probability>=40){
+         probabilityTxt = "Needs Attention";		
+    	}else{
+    		probabilityTxt = "Business As Usual";
+    	}
+    	
+    	tablebody = tablebody + "<tr><td><a href='crmData/"+row.data.sentimentData.email[0].value+"'>"+row.data.sentimentData.clientid[0].value+"</a></td><td>"+row.data.sentimentData.email[0].value+"</td><td>"+row.data.sentimentData.age[0].value+"</td><td>"+(1000000*Math.random()).toFixed(2)+"</td><td>"+ probabilityTxt+"</td></tr>";
+
+     }
+     
+     tablebody = tablebody + "</tbody></table>";
+     
+     $('#RMtable')
+         .append(tableStart+tableheader+tablefooter+tablebody);
+         
+          $('#RMDataTable').DataTable();
+      
+   },
+   type: 'GET'
+});
+});
+	
+    //$('#example').DataTable();
+</script>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Code Grind - Team Catalyst</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/">Home</a></li>
+        <li><a href="AboutUs">About US</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- First Container -->
+<div class="container-fluid bg-3 text-center">
+  <div id='RMtable'></div>
+</div>
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+ <!-- <p>Bootstrap Theme Made By <a href="https://www.w3schools.com">www.w3schools.com</a></p> -->
+</footer>
+
+</body>
+</html>

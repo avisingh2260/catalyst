@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Theme Made By www.w3schools.com - No Copyright -->
+ <title>Code Grind - Team Catalyst</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+  <style>
+
+  p {font-size: 16px;}
+  .margin {margin-bottom: 45px;}
+  .bg-1 { 
+      background-color: #1abc9c; /* Green */
+      color: #ffffff;
+  }
+  .bg-2 { 
+      background-color: #474e5d; /* Dark Blue */
+      color: #ffffff;
+  }
+  .bg-3 { 
+      background-color: #ffffff; /* White */
+      color: #555555;
+  }
+  .bg-4 { 
+      background-color: #2f2f2f; /* Black Gray */
+      color: #fff;
+  }
+  .container-fluid {
+      padding-top: 70px;
+      padding-bottom: 70px;
+  }
+  .navbar {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      font-size: 12px;
+      letter-spacing: 5px;
+  }
+  .navbar-nav  li a:hover {
+      color: #1abc9c !important;
+  }
+  </style>
+  <script>
+/*eslint-env jquery */
+$(document).ready(function() {
+calculateConstant();
+});
+
+function calculateConstant(){
+$.ajax({
+   url: 'http://localhost:8080/constants',
+   //url: 'https://8080-dot-3268910-dot-devshell.appspot.com/all',
+   
+   data: {
+      format: 'json'
+   },
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+   },
+   dataType: 'json',
+   cors: true ,
+          contentType:'application/json',
+          secure: true,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
+   success: function(result) {
+    var tableStart = "<table id='RMDataTable' class='table table-striped table-bordered' cellspacing='0' width='100%''>";
+    var tableheader = "<thead><tr><th align='center'>Age</th><th align='center'>Gender</th><th align='center'>No of Visits</th><th align='center'>No of Calls</th><th>Positive</th><th>Negative</th><th>Intercept</th></tr></thead>";
+    var tablebody = "<tbody>";
+    const row = result;	
+    tablebody = tablebody + "<tr><td>"+row[0].data.regressionValuesFamily.age[0].value+"</a></td><td>"+row[0].data.regressionValuesFamily.gender[0].value+"</td><td>"+row[0].data.regressionValuesFamily.noOfVisits[0].value+"</td><td>"+row[0].data.regressionValuesFamily.noOfCalls[0].value+"</td><td>"+row[0].data.regressionValuesFamily.Positive[0].value+"</td><td>"+row[0].data.regressionValuesFamily.Negative[0].value+"</td><td>"+row[0].data.regressionValuesFamily.intercept[0].value+"</td></tr>";
+     
+     tablebody = tablebody + "</tbody></table>";
+     
+     $('#RMtable')
+         .append(tableStart+tableheader+tablebody);
+         
+          $('#RMDataTable').DataTable( {
+        "paging":   false,
+        "ordering": false,
+        "info":     false,
+		"searching": false
+    } );
+      
+   },
+   type: 'GET'
+});
+}
+function refreshConstant(){
+$.ajax({
+   url: 'http://localhost:8080/refreshConstant',
+   //url: 'https://8080-dot-3268910-dot-devshell.appspot.com/all',
+
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+   },
+   cors: true ,
+          contentType:'application/json',
+          secure: true,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                    },
+   success: function(result) {
+   $('#RMDataTable').remove();
+   calculateConstant();   
+   },
+   type: 'GET'
+});
+}	
+    //$('#example').DataTable();
+</script>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Code Grind - Team Catalyst</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/">Home</a></li>
+        <li><a href="AboutUs">About US</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- First Container -->
+<div align="center">
+<button type="button" class="btn btn-primary" onclick="refreshConstant()">Refresh Constants</button>
+</div>
+<div class="container-fluid bg-3 text-center">
+  <div id='RMtable'></div>
+</div>
+<!-- Footer -->
+
+
+</body>
+</html>

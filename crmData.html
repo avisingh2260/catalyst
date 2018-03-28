@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Theme Made By www.w3schools.com - No Copyright -->
+<title>Code Grind - Team Catalyst</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <style>
+  body {
+      font: 20px Montserrat, sans-serif;
+      line-height: 1.8;
+      color: #f5f6f7;
+  }
+  p {font-size: 16px;}
+  .margin {margin-bottom: 45px;}
+  .bg-1 { 
+      background-color: #1abc9c; /* Green */
+      color: #ffffff;
+  }
+  .bg-2 { 
+      background-color: #474e5d; /* Dark Blue */
+      color: #ffffff;
+  }
+  .bg-3 { 
+      background-color: #ffffff; /* White */
+      color: #555555;
+  }
+  .bg-4 { 
+      background-color: #2f2f2f; /* Black Gray */
+      color: #fff;
+  }
+  .container-fluid {
+      padding-top: 70px;
+      padding-bottom: 70px;
+  }
+  .navbar {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border: 0;
+      border-radius: 0;
+      margin-bottom: 0;
+      font-size: 12px;
+      letter-spacing: 5px;
+  }
+  .navbar-nav  li a:hover {
+      color: #1abc9c !important;
+  }
+  
+
+div.inline { float:left}
+.clearBoth { clear:both; }
+
+
+  </style>
+  <script>
+/*eslint-env jquery */
+var getUrlParameter;
+$(document).ready(function() {
+	getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+calculate();
+
+	
+});
+function calculate(){
+var id = getUrlParameter('id');
+	var $probability;
+	$.ajax({
+   url: 'http://localhost:8080/email/'+id,
+  // url: 'https://8080-dot-3268910-dot-devshell.appspot.com/email/'+id,
+   data: {
+      format: 'json'
+   },
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+	  
+   },
+   dataType: 'json',
+   success: function(result) {
+    
+ 
+    var positive=parseFloat(result.data.sentimentData.Positive[0].value);
+    var negative = parseFloat(result.data.sentimentData.Negative[0].value);
+    $probability = parseFloat(1 - parseFloat(result.data.sentimentData.Probability[0].value)).toFixed(2);
+    var $lastSentiment =  parseFloat(result.data.sentimentData.lastSentiment[0].value);
+
+    var $positivepercentage = (positive / (positive + negative))*100;
+    var $negativepercentage = (negative / (positive + negative))*100;
+   
+
+
+$( '#positive' ).css({
+
+    width:$positivepercentage+"%"
+
+});
+
+$( '#negative' ).css({
+
+    width:$negativepercentage+"%"
+
+});
+
+
+//bar graph
+
+	var colors = Highcharts.getOptions().colors.slice(4),
+    
+    		dark = -0.5;
+    
+    colors[1] = Highcharts.Color(colors[0]).brighten(dark).get();
+    
+    colors = Highcharts.getOptions().colors.slice(7);
+
+    colors[3] = Highcharts.Color(colors[2]).brighten(dark).get();
+
+
+    $('#container1').highcharts({
+
+        chart: {
+            type: 'bar'
+        },
+        
+        colors: colors,
+
+        title: {
+            text: 'Sentiment Analysis'
+        },
+
+        xAxis: {
+            categories: ['Sentiment'],
+            min : 0,
+            max: 0,
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: 0,
+
+        },
+        tooltip: {
+       
+        },
+
+        plotOptions: {
+        series: {
+            stacking: 'normal'
+        }
+    },
+
+         series: [{
+        name: 'Positive',
+        data: [$positivepercentage]
+    }, {
+        name: 'Negative',
+        data: [$negativepercentage]
+    }]
+    });
+
+if($lastSentiment<0){
+//negative	
+$( '#lastSentiment' ).html("The last sentiment captured for this client was <i class='fa fa-frown-o' style='font-size:48px;color:red'></i>");
+}else if($lastSentiment>=0){
+	$( '#lastSentiment' ).html("The last sentiment captured for this client was <i class='fa fa-smile-o' style='font-size:48px;color:green'></i>");
+}else{
+	$( '#lastSentiment' ).html("The last sentiment captured for this client was <i class='fa fa-meh-o' style='font-size:48px;color:yellow'></i>");
+}
+
+//speedometer
+
+Highcharts.chart('container2', {
+
+    chart: {
+        type: 'gauge',
+        plotBackgroundColor: null,
+        plotBackgroundImage: null,
+        plotBorderWidth: 0,
+        plotShadow: false
+    },
+
+    title: {
+        text: 'Client Retention Probability'
+    },
+
+    pane: {
+        startAngle: -150,
+        endAngle: 150,
+        background: [{
+            backgroundColor: {
+                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                stops: [
+                    [0, '#FFF'],
+                    [1, '#333']
+                ]
+            },
+            borderWidth: 0,
+            outerRadius: '109%'
+        }, {
+            backgroundColor: {
+                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                stops: [
+                    [0, '#333'],
+                    [1, '#FFF']
+                ]
+            },
+            borderWidth: 1,
+            outerRadius: '107%'
+        }, {
+            // default background
+        }, {
+            backgroundColor: '#DDD',
+            borderWidth: 0,
+            outerRadius: '105%',
+            innerRadius: '103%'
+        }]
+    },
+
+    // the value axis
+    yAxis: {
+        min: 0,
+        max: 100,
+
+        minorTickInterval: 'auto',
+        minorTickWidth: 1,
+        minorTickLength: 10,
+        minorTickPosition: 'inside',
+        minorTickColor: '#666',
+
+        tickPixelInterval: 30,
+        tickWidth: 2,
+        tickPosition: 'inside',
+        tickLength: 10,
+        tickColor: '#666',
+        labels: {
+            step: 2,
+            rotation: 'auto'
+        },
+        title: {
+            text: 'Satisfaction'
+        },
+        plotBands: [{
+            from: 0,
+            to: 40,
+            color: '#DF5353' // red
+        }, {
+            from: 40,
+            to: 60,
+            color: '#DDDF0D' // yellow
+        }, {
+            from: 60,
+            to: 100,
+            color: '#55BF3B' // green
+        }]
+    },
+
+    series: [{
+        name: '',
+        data: [80],
+        tooltip: {
+            valueSuffix: ' Satisfaction'
+        }
+    }]
+
+},
+// Add some life
+function (chart) {
+    if (!chart.renderer.forExport) {
+           var point = chart.series[0].points[0]
+			newVal = parseFloat($probability)*100;
+            point.update(newVal);
+
+    }
+});
+ },
+   type: 'GET'
+});
+
+}
+function refreshSentiment(){
+	var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+var id = getUrlParameter('id');
+console.log(id);
+
+$.ajax({
+   url: 'http://localhost:8080/refreshSentiment/'+id,
+  // url: 'https://8080-dot-3268910-dot-devshell.appspot.com/email/'+id,
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+   },
+   success: function(result) {
+   calculate();
+},
+   type: 'GET'
+});
+}
+
+	
+    //$('#example').DataTable();
+</script>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Code Grind - Team Catalyst</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/">Home</a></li>
+        <li><a href="AboutUs">About US</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- First Container -->
+<div align="center">
+<button type="button" class="btn btn-primary" onclick="refreshSentiment()">Refresh Sentiment</button>
+<a href="/regressionconstant" class="btn btn-primary">View Constants</a>
+</div>
+<div style='display: inline-block'><div class="container-fluid bg-3 text-center inline">
+  <div id="container1" style=" width: 100%; height: 100%; margin: 0 auto"></div>
+  <div id="lastSentiment"></div>
+  </div>
+  
+  <!-- second Container -->
+<div class="container-fluid bg-3 text-center inline">
+<div id="container2" style="width: 100%; height: 100%; margin: 0 auto"></div>
+  </div>
+  </div>
+  <!-- second Container -->
+<div class="container-fluid bg-3 text-center" style='display: inline-block'>
+<div id="container2" style="width: 100%; height: 100%; margin: 0 auto"></div>
+  </div>
+  </div>
+  
+</div>
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center" >
+ <!-- <p>Bootstrap Theme Made By <a href="https://www.w3schools.com">www.w3schools.com</a></p> -->
+</footer>
+
+</body>
+</html>
