@@ -80,7 +80,7 @@ rsa==3.4.2
 scandir==1.6
 simplegeneric==0.8.1
 six==1.11.0
-supervisor==3.0
+supervisor==3.0.1
 tensorflow==1.4.0
 tensorflow-tensorboard==0.4.0rc3
 traitlets==4.3.2
